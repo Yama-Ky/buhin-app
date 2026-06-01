@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>部材・見積書アプリ</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:#0d0f14;color:#e8eaf0;min-height:100vh;}
+button{font-family:inherit;cursor:pointer;}
+input,select{font-family:inherit;}
+select option{background:#1c2030;color:#e8eaf0;}
+#header{background:#161920;border-bottom:1px solid #252a3a;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo-sub{color:#e94560;font-size:9px;letter-spacing:3px;font-weight:700;margin-bottom:2px;}
+.logo-main{font-size:15px;font-weight:800;}
+.tab-bar{display:flex;gap:4px;}
+.tab-btn{padding:6px 10px;border-radius:6px;border:none;font-size:11px;font-weight:700;color:#9ca3af;background:transparent;position:relative;}
+.tab-btn.active{background:#e94560;color:#fff;}
+.badge{position:absolute;top:-5px;right:-5px;background:#f5a623;color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.content{padding:12px 12px 90px;}
+.card{background:#1c2030;border-radius:10px;padding:11px 13px;border:1px solid #252a3a;margin-bottom:10px;}
+.info-label{font-size:10px;color:#6b7280;margin-bottom:2px;margin-top:8px;}
+.info-input{width:100%;border:none;border-bottom:1px solid #252a3a;font-size:14px;padding:4px 0;outline:none;color:#e8eaf0;background:none;}
+.section-title{font-size:11px;font-weight:700;color:#3b82f6;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #2563eb;}
+.group-bar{display:flex;gap:6px;margin-bottom:8px;}
+.group-btn{flex:1;padding:7px 4px;border-radius:8px;border:1px solid #252a3a;background:#1c2030;color:#9ca3af;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.group-btn.active{border-color:#2563eb;background:#2563eb;color:#fff;}
+.g-icon{font-size:16px;}
+.g-label{font-size:10px;font-weight:700;white-space:nowrap;}
+.g-count{font-size:9px;border-radius:10px;padding:1px 5px;background:#161920;color:#6b7280;}
+.group-btn.active .g-count{background:rgba(255,255,255,0.2);color:#fff;}
+.cat-wrap{position:relative;margin-bottom:8px;}
+.cat-select{width:100%;padding:9px 36px 9px 12px;border-radius:8px;border:1px solid #252a3a;background:#1c2030;color:#e8eaf0;font-size:13px;outline:none;appearance:none;-webkit-appearance:none;}
+.cat-select.selected{border-color:#3b82f6;color:#3b82f6;font-weight:700;}
+.cat-arrow{position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:#6b7280;font-size:12px;}
+.cat-reset{position:absolute;right:36px;top:50%;transform:translateY(-50%);border:none;background:none;color:#6b7280;font-size:14px;padding:0 4px;}
+.filter-badge{margin-top:4px;font-size:11px;color:#6b7280;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.fb-group{background:#2563eb;color:#fff;border-radius:4px;padding:1px 7px;font-weight:700;}
+.fb-cat{background:#161920;color:#3b82f6;border-radius:4px;padding:1px 7px;border:1px solid #2563eb;font-weight:700;}
+.count-label{font-size:11px;color:#6b7280;margin-bottom:8px;padding-left:2px;}
+.item-card{background:#1c2030;border-radius:10px;padding:11px 13px;border:1px solid #252a3a;margin-bottom:8px;}
+.item-card.in-cart{border-color:#e94560;}
+.cat-tag{background:#161920;border-radius:4px;padding:1px 6px;margin-right:5px;font-weight:700;font-size:10px;color:#9ca3af;}
+.item-name{font-size:14px;font-weight:700;}
+.in-cart-badge{background:#e94560;color:#fff;border-radius:6px;font-size:11px;font-weight:700;padding:2px 8px;white-space:nowrap;}
+.item-row{display:flex;gap:8px;align-items:center;margin-top:8px;}
+.qty-input{flex:1;padding:8px 10px;border-radius:6px;border:1px solid #252a3a;font-size:13px;outline:none;background:#161920;color:#e8eaf0;}
+.add-btn{padding:8px 14px;border-radius:6px;border:none;background:#2563eb;color:#fff;font-size:13px;font-weight:700;white-space:nowrap;}
+.float-btn{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#e94560,#c73652);color:#fff;border-radius:30px;padding:11px 22px;box-shadow:0 4px 20px rgba(233,69,96,0.5);font-size:13px;font-weight:700;border:none;z-index:50;white-space:nowrap;}
+.print-btn{width:100%;padding:13px;border-radius:10px;border:none;background:linear-gradient(135deg,#e94560,#c73652);color:#fff;font-size:15px;font-weight:700;margin-bottom:12px;box-shadow:0 4px 16px rgba(233,69,96,0.35);}
+.tbl-head{background:#2563eb;color:#fff;padding:7px 13px;font-size:11px;font-weight:700;display:grid;gap:4px;}
+.tbl-row{padding:8px 13px;display:grid;gap:4px;align-items:center;border-bottom:1px solid #252a3a;}
+.tbl-row.even{background:#1c2030;}.tbl-row.odd{background:#161920;}
+.tbl-qty-input{width:100%;text-align:center;border:1px solid #252a3a;border-radius:4px;padding:3px 2px;font-size:12px;background:#161920;color:#e8eaf0;outline:none;}
+.total-banner{margin-top:10px;background:rgba(255,255,255,0.05);border-radius:8px;padding:9px 13px;display:flex;justify-content:space-between;align-items:center;}
+.total-amount{font-size:22px;font-weight:900;color:#e94560;}
+.sub-row{padding:7px 13px;display:flex;justify-content:space-between;}
+.grand-row{background:#0d0f14;padding:11px 13px;border-radius:0 0 10px 10px;}
+.grand-inner{display:flex;justify-content:space-between;align-items:center;}
+.ja-toggle{display:flex;background:#161920;border-radius:8px;border:1px solid #252a3a;overflow:hidden;}
+.ja-btn{padding:6px 18px;border:none;font-size:13px;font-weight:700;background:transparent;color:#6b7280;}
+.ja-btn.active{background:#e94560;color:#fff;}
+.labor-row{background:#161920;border-radius:8px;padding:10px 11px;margin-bottom:8px;border:1px solid #252a3a;}
+.labor-input{padding:7px 9px;border:1px solid #252a3a;border-radius:6px;font-size:13px;outline:none;background:#161920;color:#e8eaf0;width:100%;}
+.add-labor-btn{width:100%;padding:9px;border-radius:8px;border:2px dashed #252a3a;background:none;color:#3b82f6;font-size:13px;font-weight:600;margin-top:4px;}
+.del-btn{border:none;background:none;color:#e94560;font-size:12px;font-weight:700;}
+.ph{background:linear-gradient(135deg,#0d0f14,#1a1f36);border:1px solid #252a3a;border-radius:10px 10px 0 0;padding:14px 15px 12px;}
+.ph-row{display:flex;justify-content:space-between;align-items:flex-start;}
+.ph-right{text-align:right;}
+.empty{text-align:center;color:#6b7280;padding:36px 20px;}
+.empty-icon{font-size:36px;margin-bottom:10px;}
+.search-box{display:flex;gap:8px;align-items:center;padding:10px 13px;}
+.search-input{flex:1;border:none;background:none;font-size:15px;outline:none;color:#e8eaf0;}
+.target-wrap{margin-top:12px;padding-top:10px;border-top:1px solid #252a3a;}
+.target-input{flex:1;padding:8px 10px;border-radius:6px;border:1px solid #252a3a;font-size:14px;outline:none;background:#161920;color:#e8eaf0;text-align:right;}
+.target-input.active-border{border-color:#e94560;}
+</style>
+</head>
+<body>
+<div id="header">
+  <div>
+    <div class="logo-sub">ESTIMATE SYSTEM</div>
+    <div class="logo-main">部材・見積書アプリ</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-list"     onclick="switchTab('list')">部材選択</button>
+    <button class="tab-btn"        id="tab-report"   onclick="switchTab('report')">内訳書</button>
+    <button class="tab-btn"        id="tab-estimate" onclick="switchTab('estimate')">見積書</button>
+  </div>
+</div>
+<div id="page-list"     class="content"></div>
+<div id="page-report"   class="content" style="display:none"></div>
+<div id="page-estimate" class="content" style="display:none"></div>
+
+<script>
+// ═══ データ ═══════════════════════════════════════════
+var MASTER=[
+  {id:1,  category:"プレシールコア",name:"パイプ(1M)",size:"20",unit:"本",price:1800,cost:1146},
+  {id:2,  category:"プレシールコア",name:"エルボ",size:"20",unit:"個",price:500,cost:244},
+  {id:3,  category:"プレシールコア",name:"チーズ",size:"20",unit:"個",price:600,cost:370},
+  {id:4,  category:"プレシールコア",name:"角ニップル",size:"20",unit:"個",price:500,cost:241},
+  {id:5,  category:"プレシールコア",name:"ユニオン",size:"20",unit:"個",price:1500,cost:891},
+  {id:6,  category:"プレシールコア",name:"LAソケット",size:"20",unit:"個",price:2800,cost:1846},
+  {id:7,  category:"HTLP",name:"パイプ(1M)",size:"20",unit:"本",price:2000,cost:1254},
+  {id:8,  category:"HTLP",name:"エルボ",size:"20",unit:"個",price:500,cost:275},
+  {id:9,  category:"HTLP",name:"チーズ",size:"20",unit:"個",price:600,cost:380},
+  {id:10, category:"HTLP",name:"角ニップル",size:"20",unit:"個",price:500,cost:286},
+  {id:11, category:"HTLP",name:"ユニオン",size:"20",unit:"個",price:2100,cost:1364},
+  {id:12, category:"HTVP",name:"パイプ(1M)",size:"13",unit:"本",price:300,cost:200},
+  {id:13, category:"HTVP",name:"エルボ",size:"13",unit:"個",price:200,cost:127},
+  {id:14, category:"HTVP",name:"チーズ",size:"13",unit:"個",price:300,cost:149},
+  {id:15, category:"HTVP",name:"ソケット",size:"13",unit:"個",price:200,cost:100},
+  {id:16, category:"HTVP",name:"バルブソケット",size:"13",unit:"個",price:1100,cost:700},
+  {id:17, category:"HTVP",name:"AL1型 ボールバルブ(1/2)",size:"15",unit:"個",price:2300,cost:1525},
+  {id:18, category:"HTVP",name:"水フレキパイプ(1M)",size:"13",unit:"本",price:800,cost:408},
+  {id:19, category:"HTVP",name:"フレキナット(1組)",size:"13",unit:"組",price:500,cost:206},
+  {id:20, category:"HTVP",name:"フレキニップル",size:"13",unit:"個",price:500,cost:144},
+  {id:21, category:"HTVP",name:"水フレキパイプ(1M)",size:"20",unit:"本",price:1200,cost:770},
+  {id:22, category:"HTVP",name:"フレキナット(1組)",size:"20",unit:"組",price:700,cost:359},
+  {id:23, category:"HTVP",name:"フレキニップル",size:"20",unit:"個",price:500,cost:264},
+  {id:24, category:"HTVP",name:"保温チューブ(LTQ)(湯)(1m)",size:"20",unit:"m",price:700,cost:360},
+  {id:25, category:"HTVP",name:"保温チューブ(STQ)(水)(1m)",size:"20",unit:"m",price:500,cost:234},
+  {id:26, category:"HTVP",name:"保温チューブ(LTQ)(湯)(1m)",size:"16",unit:"m",price:600,cost:325},
+  {id:27, category:"HTVP",name:"保温チューブ(STQ)(水)(1m)",size:"16",unit:"m",price:500,cost:175},
+  {id:28, category:"HTVP",name:"減圧弁セット",size:"-",unit:"式",price:10000,cost:7200},
+  {id:29, category:"エアコン",name:"冷媒管(PC2320)",size:"-",unit:"m",price:1200,cost:0},
+  {id:30, category:"エアコン",name:"電線 Fケーブル",size:"-",unit:"m",price:400,cost:0},
+  {id:31, category:"エアコン",name:"ドレン CBDH2-14",size:"-",unit:"m",price:100,cost:0},
+  {id:32, category:"エアコン",name:"AD-7 ダクト本体(1m)",size:"7型",unit:"本",price:1200,cost:0},
+  {id:33, category:"エアコン",name:"AW-7 ウォールコーナー",size:"7型",unit:"個",price:1000,cost:0},
+  {id:34, category:"エアコン",name:"AK-7 コーナー",size:"7型",unit:"個",price:1000,cost:0},
+  {id:35, category:"エアコン",name:"AJ-7 ジョイント",size:"7型",unit:"個",price:400,cost:0},
+  {id:36, category:"エアコン",name:"AES-7 端末カバー",size:"7型",unit:"個",price:400,cost:0},
+  {id:37, category:"灯油タンク",name:"ホクエイ HT-G-S(Y) 490型スタンダード",size:"-",unit:"台",price:60000,cost:40000},
+  {id:38, category:"灯油タンク",name:"ホクエイ HT-G200-SP-S 200型片面ハーフ",size:"-",unit:"台",price:45000,cost:31200},
+  {id:39, category:"灯油タンク",name:"サンダイア KS3-490SJ 450型スタンダード",size:"-",unit:"台",price:60000,cost:38700},
+  {id:40, category:"灯油タンク",name:"サンダイア KH3-198SJ 198型片面ハーフ",size:"-",unit:"台",price:45000,cost:30300},
+  {id:78, category:"灯油タンク",name:"ホクエイ タンクルーフ フラット HT-RF",size:"-",unit:"台",price:37000,cost:24500},
+  {id:79, category:"灯油タンク",name:"ホクエイ タンクルーフ 片流れ HT-JF",size:"-",unit:"台",price:40000,cost:26500},
+  {id:80, category:"灯油タンク",name:"サンダイア タンクルーフ 丸型 490P-71B",size:"-",unit:"台",price:35800,cost:23100},
+  {id:81, category:"灯油タンク",name:"サンダイア タンクルーフ 片流れ 490P-72B",size:"-",unit:"台",price:35800,cost:23100},
+  {id:41, category:"灯油タンク(JA)",name:"ホクエイ HT-G-S(Y) 490型スタンダード",size:"-",unit:"台",price:45000,cost:40000},
+  {id:42, category:"灯油タンク(JA)",name:"ホクエイ HT-G200-SP-S 200型片面ハーフ",size:"-",unit:"台",price:34000,cost:31200},
+  {id:43, category:"灯油タンク(JA)",name:"サンダイア KS3-490SJ 450型スタンダード",size:"-",unit:"台",price:45000,cost:38700},
+  {id:44, category:"灯油タンク(JA)",name:"サンダイア KH3-198SJ 198型片面ハーフ",size:"-",unit:"台",price:34000,cost:30300},
+  {id:82, category:"灯油タンク(JA)",name:"ホクエイ タンクルーフ フラット HT-RF",size:"-",unit:"台",price:27000,cost:24500},
+  {id:83, category:"灯油タンク(JA)",name:"ホクエイ タンクルーフ 片流れ HT-JF",size:"-",unit:"台",price:29000,cost:26500},
+  {id:84, category:"灯油タンク(JA)",name:"サンダイア タンクルーフ 丸型 490P-71B",size:"-",unit:"台",price:27000,cost:23100},
+  {id:85, category:"灯油タンク(JA)",name:"サンダイア タンクルーフ 片流れ 490P-72B",size:"-",unit:"台",price:29000,cost:23100},
+  {id:45, category:"灯油タンク部材",name:"ホクエイ 3WAYストレーナー OF-100LVH",size:"-",unit:"個",price:5800,cost:3770},
+  {id:46, category:"灯油タンク部材",name:"ホクエイ ストレーナー OF-100LVE-1",size:"-",unit:"個",price:6000,cost:3900},
+  {id:47, category:"灯油タンク部材",name:"サンダイア 3WAYストレーナー 250P-09W",size:"-",unit:"個",price:6500,cost:4480},
+  {id:48, category:"灯油タンク部材",name:"小出しロ 一式",size:"-",unit:"式",price:5000,cost:3380},
+  {id:49, category:"灯油タンク部材",name:"タンクゲージ",size:"-",unit:"個",price:4700,cost:2538},
+  {id:50, category:"灯油タンク部材",name:"エアー抜き",size:"-",unit:"個",price:1800,cost:1260},
+  {id:51, category:"灯油タンク部材",name:"ストレーナーカップ",size:"-",unit:"個",price:800,cost:0},
+  {id:52, category:"灯油タンク部材",name:"ストレーナーフィルター",size:"-",unit:"個",price:800,cost:0},
+  {id:53, category:"灯油タンク部材",name:"ストレーナーOリング",size:"-",unit:"個",price:500,cost:0},
+  {id:54, category:"灯油タンク部材(JA)",name:"ホクエイ 3WAYストレーナー OF-100LVH",size:"-",unit:"個",price:4500,cost:3770},
+  {id:55, category:"灯油タンク部材(JA)",name:"ホクエイ ストレーナー OF-100LVE-1",size:"-",unit:"個",price:4700,cost:3900},
+  {id:56, category:"灯油タンク部材(JA)",name:"サンダイア 3WAYストレーナー 250P-09W",size:"-",unit:"個",price:5200,cost:4480},
+  {id:57, category:"灯油タンク部材(JA)",name:"小出しロ 一式",size:"-",unit:"式",price:4000,cost:3380},
+  {id:58, category:"灯油タンク部材(JA)",name:"タンクゲージ",size:"-",unit:"個",price:3200,cost:2538},
+  {id:59, category:"灯油タンク部材(JA)",name:"エアー抜き",size:"-",unit:"個",price:1500,cost:1260},
+  {id:60, category:"灯油タンク部材(JA)",name:"ストレーナーカップ",size:"-",unit:"個",price:600,cost:0},
+  {id:61, category:"灯油タンク部材(JA)",name:"ストレーナーフィルター",size:"-",unit:"個",price:600,cost:0},
+  {id:62, category:"灯油タンク部材(JA)",name:"ストレーナーOリング",size:"-",unit:"個",price:300,cost:0},
+  {id:63, category:"灯油配管",name:"8φ銅パイ(1m)",size:"8φ",unit:"本",price:800,cost:450},
+  {id:64, category:"灯油配管",name:"8φソケット",size:"8φ",unit:"個",price:800,cost:288},
+  {id:65, category:"灯油配管",name:"8φエルボ",size:"8φ",unit:"個",price:800,cost:288},
+  {id:66, category:"灯油配管",name:"8φチーズ",size:"8φ",unit:"個",price:800,cost:366},
+  {id:67, category:"灯油配管",name:"ジョイント",size:"8φ",unit:"個",price:800,cost:216},
+  {id:68, category:"灯油配管",name:"8φ樹脂サドル",size:"8φ",unit:"個",price:50,cost:19},
+  {id:69, category:"灯油配管",name:"油送ホース(1m)",size:"-",unit:"本",price:500,cost:220},
+  {id:70, category:"灯油配管",name:"油送ホースバンド",size:"-",unit:"個",price:100,cost:30},
+  {id:71, category:"灯油配管",name:"8φアングルコック",size:"8φ",unit:"個",price:1200,cost:694},
+  {id:72, category:"灯油配管",name:"8φストレートコック",size:"8φ",unit:"個",price:1200,cost:694},
+  {id:73, category:"灯油配管",name:"8φ中間コック",size:"8φ",unit:"個",price:1500,cost:963},
+  {id:74, category:"灯油配管",name:"白管(1m)",size:"-",unit:"本",price:1200,cost:700},
+  {id:75, category:"灯油配管",name:"白ニップル",size:"-",unit:"個",price:150,cost:94},
+  {id:76, category:"灯油配管",name:"白エルボ",size:"-",unit:"個",price:180,cost:81},
+  {id:77, category:"灯油配管",name:"油送ホースバンド",size:"-",unit:"個",price:100,cost:30}
+];
+
+var GROUPS=[
+  {id:"all",   label:"すべて",  icon:"📦",cats:[]},
+  {id:"pipe",  label:"配管系",  icon:"🔧",cats:["プレシールコア","HTLP","HTVP","灯油配管"]},
+  {id:"tank",  label:"タンク系",icon:"🛢️",cats:["灯油タンク","灯油タンク(JA)","灯油タンク部材","灯油タンク部材(JA)"]},
+  {id:"aircon",label:"エアコン",icon:"❄️",cats:["エアコン"]}
+];
+
+var LABOR_PRESETS={
+  "タンク交換作業料":{general:21000,ja:15000},
+  "タンクルーフ作業料":{general:14000,ja:14000},
+  "タンクとルーフ作業料":{general:21000,ja:21000}
+};
+
+// ═══ 状態 ═══════════════════════════════════════════
+var S={
+  tab:"list", searchVal:"", activeGroup:"all", activeCat:"すべて",
+  cart:{}, qtyInputs:{},
+  laborRows:[
+    {id:1,name:"商品",detail:"",qty:"1式",amount:""},
+    {id:2,name:"作業料",detail:"",qty:"1式",amount:""}
+  ],
+  laborId:3, isJA:false,
+  freeItems:[],  // 手入力部材 [{id,name,qty,unit,price}]
+  freeItemId:1,
+  rCompany:"㈱弘善商会",rProject:"",rDate:todayStr(),
+  eCompany:"㈱弘善商会",eClient:"〇〇　様",eProject:"",eDate:todayStr(),eExpire:"発行日より30日間",
+  targetTotal:""
+};
+
+function todayStr(){return new Date().toLocaleDateString("ja-JP");}
+function fmt(n){return Math.round(n).toLocaleString("ja-JP");}
+function esc(s){if(s==null)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function cartItems(){return Object.values(S.cart);}
+function cartCount(){return Object.keys(S.cart).length;}
+
+// ═══ タブ ═══════════════════════════════════════════
+function switchTab(t){
+  S.tab=t;
+  ["list","report","estimate"].forEach(function(id){
+    document.getElementById("page-"+id).style.display=(id===t?"block":"none");
+    document.getElementById("tab-"+id).classList.toggle("active",id===t);
+  });
+  updateBadges();
+  if(t==="list")     renderList();
+  if(t==="report")   renderReport();
+  if(t==="estimate") renderEstimate();
+}
+function updateBadges(){
+  var cnt=cartCount();
+  ["report","estimate"].forEach(function(id){
+    var btn=document.getElementById("tab-"+id);
+    var old=btn.querySelector(".badge");if(old)old.remove();
+    if(cnt>0){var b=document.createElement("span");b.className="badge";b.textContent=cnt;btn.appendChild(b);}
+  });
+}
+
+// ═══ フィルター ══════════════════════════════════════
+function getFiltered(){
+  var q=S.searchVal.toLowerCase();
+  var g=GROUPS.find(function(x){return x.id===S.activeGroup;});
+  return MASTER.filter(function(item){
+    var inGroup=S.activeGroup==="all"||g.cats.indexOf(item.category)>=0;
+    var inCat=S.activeCat==="すべて"||item.category===S.activeCat;
+    var inSearch=!q||item.name.indexOf(q)>=0||item.category.indexOf(q)>=0||item.size.indexOf(q)>=0;
+    return inGroup&&inCat&&inSearch;
+  });
+}
+function selectGroup(gid){S.activeGroup=gid;S.activeCat="すべて";renderList();}
+function selectCat(val){S.activeCat=val;renderList();}
+function clearSearch(){S.searchVal="";renderList();}
+
+// ═══ 部材選択 ════════════════════════════════════════
+function renderList(){
+  var el=document.getElementById("page-list");
+  var filtered=getFiltered();
+  var cnt=cartCount();
+  var g=GROUPS.find(function(x){return x.id===S.activeGroup;});
+  var h="";
+
+  // 検索ボックス
+  h+='<div class="card search-box">';
+  h+='<span style="font-size:16px">🔍</span>';
+  h+='<input class="search-input" id="si" type="search" placeholder="品名・カテゴリで検索..." value="'+esc(S.searchVal)+'" oninput="onSearch(this.value)">';
+  if(S.searchVal) h+='<button class="search-clear" onclick="clearSearch()" style="border:none;background:none;color:#6b7280;font-size:16px">✕</button>';
+  h+='</div>';
+
+  // グループバー（検索中は非表示）
+  if(!S.searchVal){
+    h+='<div class="group-bar">';
+    GROUPS.forEach(function(gr){
+      var cnt2=gr.id==="all"?MASTER.length:MASTER.filter(function(m){return gr.cats.indexOf(m.category)>=0;}).length;
+      var act=S.activeGroup===gr.id;
+      h+='<button class="group-btn'+(act?" active":"")+'" onclick="selectGroup(\''+gr.id+'\')">';
+      h+='<span class="g-icon">'+gr.icon+'</span>';
+      h+='<span class="g-label">'+gr.label+'</span>';
+      h+='<span class="g-count">'+cnt2+'品</span>';
+      h+='</button>';
+    });
+    h+='</div>';
+
+    // カテゴリプルダウン
+    if(S.activeGroup!=="all"){
+      var allCats=[...new Set(MASTER.map(function(m){return m.category;}))];
+      var groupCats=g.cats.filter(function(c){return allCats.indexOf(c)>=0;});
+      if(groupCats.length>1){
+        var sel=S.activeCat!=="すべて";
+        h+='<div class="cat-wrap">';
+        h+='<select class="cat-select'+(sel?" selected":"")+'" onchange="selectCat(this.value)">';
+        h+='<option value="すべて">── '+esc(g.label)+'すべて ('+groupCats.length+'カテゴリ) ──</option>';
+        groupCats.forEach(function(cat){
+          var c2=MASTER.filter(function(m){return m.category===cat;}).length;
+          h+='<option value="'+esc(cat)+'"'+(S.activeCat===cat?" selected":"")+'>'+esc(cat)+'（'+c2+'品目）</option>';
+        });
+        h+='</select>';
+        h+='<span class="cat-arrow">▼</span>';
+        if(sel) h+='<button class="cat-reset" onclick="selectCat(\'すべて\')">✕</button>';
+        h+='</div>';
+        // 絞り込みバッジ
+        if(S.activeGroup!=="all"||S.activeCat!=="すべて"){
+          h+='<div class="filter-badge"><span>絞り込み中：</span>';
+          if(S.activeGroup!=="all") h+='<span class="fb-group">'+g.icon+' '+g.label+'</span>';
+          if(S.activeCat!=="すべて") h+='<span class="fb-cat">'+esc(S.activeCat)+'</span>';
+          h+='</div>';
+        }
+      }
+    }
+  }
+
+  h+='<div class="count-label">'+filtered.length+'件表示</div>';
+
+  if(filtered.length===0){
+    h+='<div class="empty"><div class="empty-icon">🔍</div>該当する部材が見つかりません</div>';
+  } else {
+    filtered.forEach(function(item){
+      var inCart=!!S.cart[item.id];
+      var qv=S.qtyInputs[item.id]||"";
+      h+='<div class="item-card'+(inCart?" in-cart":"")+'" id="ic-'+item.id+'">';
+      h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">';
+      h+='<div style="flex:1">';
+      h+='<div style="font-size:10px;color:#6b7280;margin-bottom:2px"><span class="cat-tag">'+esc(item.category)+'</span>サイズ: '+esc(item.size)+'</div>';
+      h+='<div class="item-name">'+esc(item.name)+'</div>';
+      h+='<div style="font-size:13px;color:#e94560;font-weight:700;margin-top:2px">売価 ¥'+fmt(item.price)+' <span style="font-size:11px;color:#6b7280;font-weight:400">/ '+item.unit+'</span><span style="margin-left:8px;font-size:11px;color:#6b7280">仕入 ¥'+fmt(item.cost)+'</span></div>';
+      h+='</div>';
+      if(inCart) h+='<span class="in-cart-badge">追加済 '+S.cart[item.id].qty+item.unit+'</span>';
+      h+='</div>';
+      h+='<div class="item-row">';
+      h+='<input class="qty-input" id="qty-'+item.id+'" type="number" min="0" step="'+(item.unit==="m"?"0.1":"1")+'" value="'+esc(qv)+'" placeholder="数量（'+item.unit+'）" oninput="S.qtyInputs['+item.id+']=this.value" onkeydown="if(event.key===\'Enter\'){event.preventDefault();doAddAndNext('+item.id+')}" enterkeyhint="next">';
+      h+='<button class="add-btn" onclick="doAdd('+item.id+')">追加</button>';
+      h+='</div></div>';
+    });
+  }
+
+  if(cnt>0) h+='<button class="float-btn" onclick="switchTab(\'report\')">📋 '+cnt+'品目 追加済み → 内訳書へ</button>';
+
+  el.innerHTML=h;
+  // 検索フォーカス維持
+  if(S.searchVal){var si=document.getElementById("si");if(si){si.focus();si.setSelectionRange(9999,9999);}}
+}
+
+function onSearch(val){S.searchVal=val;if(val){S.activeGroup="all";S.activeCat="すべて";}renderList();}
+
+function doAddAndNext(id){
+  var qtyVal=S.qtyInputs[id];
+  var hasQty=qtyVal&&qtyVal!==""&&parseFloat(qtyVal)>0;
+  if(hasQty) doAdd(id);
+  // 次の項目にフォーカス
+  var filt=getFiltered();
+  var idx=filt.findIndex(function(m){return m.id===id;});
+  if(idx>=0&&idx<filt.length-1){
+    var nid=filt[idx+1].id;
+    setTimeout(function(){var n=document.getElementById("qty-"+nid);if(n)n.focus();},30);
+  }
+}
+
+function doAdd(id){
+  var item=MASTER.find(function(m){return m.id===id;});
+  var qtyVal=S.qtyInputs[id];
+  // 数量が未入力・空・0の場合は追加しない
+  if(!qtyVal||qtyVal===""||parseFloat(qtyVal)<=0) return;
+  var qty=parseFloat(qtyVal);
+  if(S.cart[id]) S.cart[id].qty=Math.round((S.cart[id].qty+qty)*10)/10;
+  else S.cart[id]=Object.assign({},item,{qty:qty});
+  S.qtyInputs[id]="";
+  updateBadges();
+  // カード更新
+  var card=document.getElementById("ic-"+id);
+  if(card){
+    card.classList.add("in-cart");
+    var badge=card.querySelector(".in-cart-badge");
+    var qInp=document.getElementById("qty-"+id);if(qInp)qInp.value="";
+    if(badge) badge.textContent="追加済 "+S.cart[id].qty+item.unit;
+    else {
+      var sp=document.createElement("span");sp.className="in-cart-badge";
+      sp.textContent="追加済 "+S.cart[id].qty+item.unit;
+      var row=card.querySelector("div[style*='justify-content']");if(row)row.appendChild(sp);
+    }
+  }
+}
+
+// ═══ 内訳書 ══════════════════════════════════════════
+function renderReport(){
+  var el=document.getElementById("page-report");
+  var items=cartItems();
+  var h='<div class="card">';
+  h+='<div class="info-label" style="margin-top:0">会社名・屋号</div>';
+  h+='<input class="info-input" value="'+esc(S.rCompany)+'" oninput="S.rCompany=this.value">';
+  h+='<div class="info-label">工事名</div>';
+  h+='<input class="info-input" style="font-weight:600" value="'+esc(S.rProject)+'" oninput="S.rProject=this.value">';
+  h+='<div class="info-label">作成日</div>';
+  h+='<input class="info-input" value="'+esc(S.rDate)+'" oninput="S.rDate=this.value">';
+  h+='</div>';
+  if(items.length===0){
+    h+='<div class="card empty"><div class="empty-icon">📋</div><div>部材が追加されていません</div><button class="add-btn" style="margin-top:12px;padding:9px 22px" onclick="switchTab(\'list\')">部材を選ぶ</button></div>';
+  } else {
+    h+=buildReportTable(items);
+  }
+  el.innerHTML=h;
+}
+
+function buildReportTable(items){
+  var allItems=items.concat(S.freeItems.filter(function(f){return f.name||parseFloat(f.price)>0;}).map(function(f){
+    return{id:"f"+f.id,category:"手入力",name:f.name||"(品名未入力)",size:"-",unit:f.unit||"個",price:parseFloat(f.price)||0,cost:0,qty:parseFloat(f.qty)||1};
+  }));
+  var total=allItems.reduce(function(s,i){return s+i.price*i.qty;},0);
+  var costTotal=allItems.reduce(function(s,i){return s+i.cost*i.qty;},0);
+  var tax=Math.round(total*0.1);
+  var totalWT=Math.round(total*1.1);
+  var cats=[...new Set(allItems.map(function(i){return i.category;}))];
+  var catSum=cats.map(function(cat){
+    return{cat:cat,count:allItems.filter(function(i){return i.category===cat;}).length,
+      sub:allItems.filter(function(i){return i.category===cat;}).reduce(function(s,i){return s+i.price*i.qty;},0)};
+  });
+  var cols="24px 1fr 36px 36px 52px 62px 62px 70px";
+  var rows="";
+  allItems.forEach(function(item,idx){
+    rows+='<div class="tbl-row '+(idx%2===0?"even":"odd")+'" style="grid-template-columns:'+cols+'">';
+    rows+='<div style="font-size:10px;color:#6b7280;font-weight:700">'+String(idx+1).padStart(2,"0")+'</div>';
+    rows+='<div style="font-size:13px;font-weight:600">'+esc(item.name)+'</div>';
+    rows+='<div style="text-align:center;font-size:11px;color:#9ca3af">'+esc(item.size)+'</div>';
+    rows+='<div style="text-align:center;font-size:13px;color:#9ca3af">'+item.unit+'</div>';
+    rows+='<div style="text-align:center"><input class="tbl-qty-input" type="number" min="0" step="0.1" value="'+item.qty+'" oninput="updateRQty('+item.id+',this.value)"></div>';
+    rows+='<div style="text-align:right;font-size:13px;color:#9ca3af">¥'+fmt(item.price)+'</div>';
+    rows+='<div style="text-align:right;font-size:11px;color:#6b7280">¥'+fmt(item.cost)+'</div>';
+    rows+='<div style="text-align:right;font-size:13px;font-weight:700">¥'+fmt(item.price*item.qty)+'</div>';
+    rows+='</div>';
+  });
+  var catRows="";
+  catSum.forEach(function(cs){
+    catRows+='<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #252a3a;font-size:13px"><span style="color:#9ca3af">'+esc(cs.cat)+'（'+cs.count+'品目）</span><span style="font-weight:700">¥'+fmt(cs.sub)+'</span></div>';
+  });
+  var delRows="";
+  allItems.forEach(function(item){
+    var isFree=String(item.id).charAt(0)==="f";
+    delRows+='<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #252a3a;font-size:12px;color:#9ca3af">';
+    delRows+='<span>'+esc(item.name)+'（'+item.qty+item.unit+'）</span>';
+    if(isFree) delRows+='<button class="del-btn" onclick="delFree('+item.id.slice(1)+');renderReport()">削除</button>';
+    else       delRows+='<button class="del-btn" onclick="removeCart('+item.id+')">削除</button>';
+    delRows+='</div>';
+  });
+  var h='<button class="print-btn" onclick="printReport()">🖨️ &nbsp;内訳書をPDFで保存</button>';
+  h+='<div id="r-print-area" style="border-radius:10px;overflow:hidden;border:1px solid #252a3a;margin-bottom:10px">';
+  h+='<div class="ph"><div class="ph-row">';
+  h+='<div><div style="font-size:9px;color:#e94560;letter-spacing:3px;font-weight:700;margin-bottom:3px">MATERIAL LIST</div><div style="font-size:18px;font-weight:800">工 事 部 材 内 訳 書</div><div style="font-size:13px;margin-top:4px;color:#9ca3af">'+esc(S.rProject)+'</div></div>';
+  h+='<div class="ph-right"><div style="font-size:10px;color:#6b7280">作成日</div><div style="font-size:12px;font-weight:600;margin-bottom:4px">'+esc(S.rDate)+'</div><div style="font-size:10px;color:#6b7280">作成者</div><div style="font-size:12px;font-weight:600">'+esc(S.rCompany)+'</div></div>';
+  h+='</div>';
+  h+='<div class="total-banner"><div style="font-size:11px;color:#6b7280;line-height:1.7">税抜合計(売価) ¥'+fmt(total)+'<br>消費税（10%）¥'+fmt(tax)+'</div><div><div style="font-size:10px;color:#6b7280">税込合計金額</div><div class="total-amount">¥'+fmt(totalWT)+'</div></div></div>';
+  h+='</div>';
+  h+='<div class="tbl-head" style="grid-template-columns:'+cols+'">';
+  ["No.","品名","S","単位","数量","売価","仕入","金額(売)"].forEach(function(hd,i){h+='<div style="text-align:'+(i>=5?"right":i>=2?"center":"left")+'">'+hd+'</div>';});
+  h+='</div>'+rows;
+  h+='<div class="sub-row" style="border-top:2px solid #2563eb;background:#161920"><span style="font-size:13px;color:#6b7280">小　計（売価・税抜）</span><span style="font-size:13px;font-weight:800">¥'+fmt(total)+'</span></div>';
+  h+='<div class="sub-row" style="background:#161920"><span style="font-size:12px;color:#6b7280">仕入合計</span><span style="font-size:12px;color:#6b7280">¥'+fmt(costTotal)+'</span></div>';
+  h+='<div class="sub-row" style="background:#161920"><span style="font-size:12px;color:#6b7280">粗利（売価－仕入）</span><span style="font-size:12px;color:#22c55e;font-weight:700">¥'+fmt(total-costTotal)+'</span></div>';
+  h+='<div class="sub-row" style="background:#161920"><span style="font-size:13px;color:#6b7280">消費税（10%）</span><span style="font-size:13px;color:#9ca3af">¥'+fmt(tax)+'</span></div>';
+  h+='<div class="grand-row"><div class="grand-inner"><span style="color:#fff;font-weight:800;font-size:14px">合　計（税込）</span><span style="color:#e94560;font-weight:900;font-size:15px">¥'+fmt(totalWT)+'</span></div></div>';
+  h+='<div style="padding:12px 14px;background:#1c2030"><div class="section-title">カテゴリ別内訳</div>'+catRows+'</div>';
+  h+='<div style="background:#161920;padding:10px 14px;border-top:1px solid #252a3a;font-size:10px;color:#6b7280;text-align:center">本内訳書は工事部材費のみの内訳です。施工費・諸経費は別途となります。</div>';
+  h+='</div>';
+  h+='<div class="card"><div class="section-title">選択中の部材</div>'+delRows+'</div>';
+  return h;
+}
+
+function updateRQty(id,val){
+  var qty=parseFloat(val);
+  if(!qty||qty<=0){delete S.cart[id];renderReport();updateBadges();return;}
+  if(S.cart[id])S.cart[id].qty=qty;
+}
+function removeCart(id){delete S.cart[id];renderReport();updateBadges();}
+function printReport(){
+  var el=document.getElementById("r-print-area");if(!el)return;
+  var win=window.open("","_blank");
+  win.document.write('<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>部材内訳書</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:\'Hiragino Kaku Gothic ProN\',sans-serif;background:#fff;color:#111;font-size:12px;}div,span{background:#fff!important;color:#111!important;border-color:#ccc!important;}input{background:#fff!important;color:#111!important;border:1px solid #ccc!important;border-radius:4px;padding:3px;font-size:11px;text-align:center;width:100%;}@page{margin:12mm;}</style></head><body>'+el.outerHTML+'</body></html>');
+  win.document.close();win.focus();setTimeout(function(){win.print();},300);
+}
+
+// ═══ 見積書 ══════════════════════════════════════════
+function renderEstimate(){
+  var el=document.getElementById("page-estimate");
+  var h='<div class="card">';
+  h+='<div class="info-label" style="margin-top:0">会社名・屋号</div><input class="info-input" value="'+esc(S.eCompany)+'" oninput="S.eCompany=this.value">';
+  h+='<div class="info-label">宛先（お客様名）</div><input class="info-input" value="'+esc(S.eClient)+'" oninput="S.eClient=this.value">';
+  h+='<div class="info-label">工事名</div><input class="info-input" style="font-weight:600" value="'+esc(S.eProject)+'" oninput="S.eProject=this.value">';
+  h+='<div class="info-label">作成日</div><input class="info-input" value="'+esc(S.eDate)+'" oninput="S.eDate=this.value">';
+  h+='<div class="info-label">有効期限</div><input class="info-input" value="'+esc(S.eExpire)+'" oninput="S.eExpire=this.value">';
+  h+='</div>';
+  h+='<div class="card" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px">';
+  h+='<span style="font-size:13px;font-weight:700">作業料の単価区分</span>';
+  h+='<div class="ja-toggle"><button class="ja-btn'+(S.isJA?"":" active")+'" onclick="setJA(false)">一般</button><button class="ja-btn'+(S.isJA?" active":"")+'" onclick="setJA(true)">JA</button></div>';
+  h+='</div>';
+  h+='<div class="card"><div class="section-title">⚙️ 工賃・諸経費の入力</div>';
+  S.laborRows.forEach(function(row){
+    var preset=LABOR_PRESETS[row.name];
+    var hint=preset?"¥"+(S.isJA?preset.ja:preset.general).toLocaleString("ja-JP"):"金額（税抜）";
+    var isFree=row.name==="自由入力";
+    var selHtml='<select class="labor-input" style="cursor:pointer" onchange="onLaborName('+row.id+',this.value)">';
+    ["商品","取付料","作業料","諸経費","工具損料"].forEach(function(v){selHtml+='<option value="'+v+'"'+(row.name===v?" selected":"")+'>'+v+'</option>';});
+    selHtml+='<optgroup label="── 灯油タンク作業料 ──">';
+    ["タンク交換作業料","タンクルーフ作業料","タンクとルーフ作業料"].forEach(function(v){selHtml+='<option value="'+v+'"'+(row.name===v?" selected":"")+'>'+v+'</option>';});
+    selHtml+='</optgroup>';
+    selHtml+='<option value="自由入力"'+(row.name==="自由入力"?" selected":"")+'>✏️ 自由入力</option>';
+    selHtml+='<option value="値引き"'+(row.name==="値引き"?" selected":"")+'>値引き</option></select>';
+    h+='<div class="labor-row">';
+    h+='<div style="display:grid;grid-template-columns:1fr 28px;gap:6px;align-items:center;margin-bottom:7px">'+selHtml;
+    h+='<button onclick="delLabor('+row.id+')" style="border:none;background:none;color:#6b7280;font-size:18px;cursor:pointer;line-height:1">✕</button></div>';
+    if(row.name==="商品"||isFree){
+      h+='<input class="labor-input" style="margin-bottom:7px" value="'+esc(row.detail)+'" placeholder="'+(isFree?"項目名を自由入力":"商品名を入力")+'" oninput="updateLabor('+row.id+',\'detail\',this.value)">';
+    }
+    h+='<div style="display:grid;grid-template-columns:70px 1fr;gap:6px;align-items:center">';
+    h+='<input class="labor-input" style="text-align:center" value="'+esc(row.qty)+'" placeholder="1式" oninput="updateLabor('+row.id+',\'qty\',this.value)">';
+    h+='<input class="labor-input" style="text-align:right" type="number" min="0" value="'+esc(row.amount)+'" placeholder="'+hint+'" oninput="updateLabor('+row.id+',\'amount\',this.value)">';
+    h+='</div></div>';
+  });
+  h+='<button class="add-labor-btn" onclick="addLabor()">＋ 工程を追加</button></div>';
+  h+='<div id="ev"></div>';
+  el.innerHTML=h;
+  renderEV();
+}
+
+// 合計計算（共通）
+function calcTotals(){
+  var items=cartItems();
+  var validLabor=S.laborRows.filter(function(r){return parseFloat(r.amount)!==0||r.name;});
+  var freeTotal=S.freeItems.reduce(function(s,f){return s+(parseFloat(f.price)||0)*(parseFloat(f.qty)||0);},0);
+  var matTotal=items.reduce(function(s,i){return s+i.price*i.qty;},0)+freeTotal;
+  var labTotal=validLabor.reduce(function(s,r){return s+(parseFloat(r.amount)||0);},0);
+  var subtotal=matTotal+labTotal;
+  var grand=Math.round(subtotal*1.1);
+  var tgtNum=parseFloat(String(S.targetTotal).replace(/,/g,""));
+  var autoDis=(!isNaN(tgtNum)&&tgtNum>0&&tgtNum<grand)?Math.round(subtotal-tgtNum/1.1):0;
+  if(autoDis<0)autoDis=0;
+  var finalSub=subtotal-autoDis;
+  return{items:items,validLabor:validLabor,matTotal:matTotal,labTotal:labTotal,
+    subtotal:subtotal,tax:Math.round(subtotal*0.1),grand:grand,autoDis:autoDis,
+    finalSub:finalSub,finalTax:Math.round(finalSub*0.1),finalTotal:Math.round(finalSub*1.1),
+    hasContent:items.length>0||S.freeItems.length>0||validLabor.some(function(r){return parseFloat(r.amount)!==0;})
+  };
+}
+
+// 手入力フォームだけ再描画（入力中に呼ばれても合計部分は触らない）
+function renderFreeForm(){
+  var el=document.getElementById("free-form");if(!el)return;
+  var h='<div style="font-size:11px;color:#3b82f6;font-weight:700;margin-bottom:8px">＋ 部材を手入力で追加</div>';
+  S.freeItems.forEach(function(f){
+    h+='<div style="background:#161920;border-radius:8px;padding:9px 10px;margin-bottom:7px;border:1px solid #252a3a">';
+    h+='<div style="display:grid;grid-template-columns:1fr 28px;gap:6px;align-items:center;margin-bottom:6px">';
+    h+='<input class="labor-input" value="'+esc(f.name)+'" placeholder="品名" onblur="saveFree('+f.id+',\'name\',this.value)">';
+    h+='<button onclick="delFree('+f.id+')" style="border:none;background:none;color:#6b7280;font-size:18px;cursor:pointer;line-height:1">✕</button>';
+    h+='</div>';
+    // カテゴリ（グループ名）入力
+    h+='<input class="labor-input" style="margin-bottom:6px" value="'+esc(f.groupName||"")+'" placeholder="分類名（例：給湯部材・灯油部材）" onblur="saveFree('+f.id+',\'groupName\',this.value)">';
+    h+='<div style="display:grid;grid-template-columns:60px 50px 1fr;gap:6px">';
+    h+='<input class="labor-input" type="number" min="0" step="0.1" style="text-align:center" value="'+esc(f.qty)+'" placeholder="数量" onblur="saveFree('+f.id+',\'qty\',this.value)">';
+    h+='<input class="labor-input" style="text-align:center" value="'+esc(f.unit)+'" placeholder="単位" onblur="saveFree('+f.id+',\'unit\',this.value)">';
+    h+='<input class="labor-input" type="number" min="0" style="text-align:right" value="'+esc(f.price)+'" placeholder="単価（税抜）" onblur="saveFree('+f.id+',\'price\',this.value)">';
+    h+='</div></div>';
+  });
+  h+='<button class="add-labor-btn" onclick="addFree()">＋ 部材を追加</button>';
+  el.innerHTML=h;
+}
+
+function renderEV(){
+  var el=document.getElementById("ev");if(!el)return;
+  var T=calcTotals();
+  if(!T.hasContent){
+    el.innerHTML='<div class="card empty"><div class="empty-icon">📄</div><div>部材か工賃を追加してください</div></div>';
+    return;
+  }
+  var cols3="1fr 90px 90px";
+  // 見積テーブル行
+  var estRows=[];
+  T.validLabor.forEach(function(r){
+    if(r.name||parseFloat(r.amount)!==0){
+      var dn=r.name==="商品"?(r.detail||"商品"):r.name==="自由入力"?(r.detail||"自由入力"):r.name||"作業費";
+      var isDis=r.name==="値引き";
+      var amt=isDis?-Math.abs(parseFloat(r.amount)||0):(parseFloat(r.amount)||0);
+      estRows.push({name:dn,sub:"",qty:r.qty||"1式",amount:amt,isDis:isDis});
+    }
+  });
+  // 工事部材をグループ別に集計して行追加
+  var groupOrder=["配管系","タンク系","エアコン","手入力"];
+  var groupMap={"配管系":[],"タンク系":[],"エアコン":[],"手入力":[]};
+  var pipeCategories=["プレシールコア","HTLP","HTVP","灯油配管"];
+  var tankCategories=["灯油タンク","灯油タンク(JA)","灯油タンク部材","灯油タンク部材(JA)"];
+  var airconCategories=["エアコン"];
+  T.items.forEach(function(item){
+    if(pipeCategories.indexOf(item.category)>=0) groupMap["配管系"].push(item);
+    else if(tankCategories.indexOf(item.category)>=0) groupMap["タンク系"].push(item);
+    else if(airconCategories.indexOf(item.category)>=0) groupMap["エアコン"].push(item);
+    else groupMap["手入力"].push(item);
+  });
+  S.freeItems.forEach(function(f){
+    var fqty=parseFloat(f.qty)||0,fprice=parseFloat(f.price)||0;
+    if(!f.name&&!fprice)return;
+    var grpName=f.groupName||"手入力";
+    if(!groupMap[grpName]) groupMap[grpName]=[];
+    groupMap[grpName].push({isFree:true,name:f.name||"品名未入力",qty:fqty,unit:f.unit||"個",price:fprice,category:grpName});
+  });
+  // グループ順に行追加（カスタムグループも含む）
+  var allGroups=groupOrder.concat(Object.keys(groupMap).filter(function(k){return groupOrder.indexOf(k)<0;}));
+  allGroups.forEach(function(grp){
+    var gitems=groupMap[grp];
+    if(!gitems||gitems.length===0)return;
+    var grpTotal=gitems.reduce(function(s,i){return s+i.price*(parseFloat(i.qty)||0);},0);
+    var label=grp==="配管系"?"給湯・配管部材一式":grp==="タンク系"?"灯油タンク部材一式":grp==="エアコン"?"エアコン部材一式":grp+"一式";
+    estRows.push({name:label,sub:"部材内訳書参照",qty:"一式",amount:grpTotal,isDis:false,isGroup:true});
+  });
+  if(T.autoDis>0) estRows.push({name:"値引き",sub:"",qty:"一式",amount:-T.autoDis,isDis:true});
+
+  var eRows="";
+  estRows.forEach(function(row,idx){
+    eRows+='<div class="tbl-row '+(idx%2===0?"even":"odd")+'" style="grid-template-columns:'+cols3+'">';
+    eRows+='<div><div style="font-size:13px;font-weight:600">'+esc(row.name)+'</div>'+(row.sub?'<div style="font-size:10px;color:#6b7280">'+esc(row.sub)+'</div>':'')+'</div>';
+    eRows+='<div style="text-align:center;font-size:13px;color:#9ca3af">'+esc(row.qty)+'</div>';
+    eRows+='<div style="text-align:right;font-size:13px;font-weight:700;color:'+(row.isDis?"#e94560":"inherit")+'">'+(row.isDis?"△"+fmt(Math.abs(row.amount)):"¥"+fmt(row.amount))+'</div>';
+    eRows+='</div>';
+  });
+
+  // 工事部材内訳（グループ別）
+  var matList="";
+  allGroups.forEach(function(grp){
+    var gitems=groupMap[grp];
+    if(!gitems||gitems.length===0)return;
+    var grpTotal=gitems.reduce(function(s,i){return s+i.price*(parseFloat(i.qty)||0);},0);
+    var label=grp==="配管系"?"給湯・配管部材":grp==="タンク系"?"灯油タンク部材":grp==="エアコン"?"エアコン部材":grp;
+    matList+='<div style="margin-bottom:10px">';
+    matList+='<div style="font-size:11px;font-weight:700;color:#3b82f6;padding:4px 0;border-bottom:1px solid #2563eb;margin-bottom:4px">'+esc(label)+'　計 ¥'+fmt(grpTotal)+'</div>';
+    gitems.forEach(function(item){
+      matList+='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #252a3a">';
+      if(item.isFree){
+        matList+='<span style="font-size:12px;color:#9ca3af">'+esc(item.name)+'（'+item.qty+item.unit+'）</span>';
+      } else {
+        matList+='<div><span style="font-size:10px;background:#161920;border-radius:4px;padding:1px 6px;margin-right:5px;color:#6b7280;font-weight:600">'+esc(item.category)+'</span>';
+        matList+='<span style="font-size:12px;color:#9ca3af">'+esc(item.name)+'（'+item.qty+item.unit+'）</span></div>';
+      }
+      matList+='<span style="font-size:12px;font-weight:600;white-space:nowrap;margin-left:8px">¥'+fmt(item.price*(parseFloat(item.qty)||0))+'</span></div>';
+    });
+    matList+='</div>';
+  });
+
+  var h='<button class="print-btn" onclick="printEstimate()">🖨️ &nbsp;見積書をPDFで保存</button>';
+  h+='<div id="e-print-area" style="border-radius:10px;overflow:hidden;border:1px solid #252a3a;margin-bottom:10px">';
+  // ヘッダー
+  h+='<div class="ph"><div class="ph-row">';
+  h+='<div><div style="font-size:9px;color:#e94560;letter-spacing:3px;font-weight:700;margin-bottom:3px">ESTIMATE</div>';
+  h+='<div style="font-size:18px;font-weight:800">御 見 積 書</div>';
+  h+='<div style="font-size:13px;margin-top:4px;color:#9ca3af">'+esc(S.eProject)+'</div></div>';
+  h+='<div class="ph-right"><div style="font-size:10px;color:#6b7280">作成日</div><div style="font-size:12px;font-weight:600;margin-bottom:4px">'+esc(S.eDate)+'</div>';
+  h+='<div style="font-size:10px;color:#6b7280">有効期限</div><div style="font-size:12px;font-weight:600;margin-bottom:4px">'+esc(S.eExpire)+'</div>';
+  h+='<div style="font-size:10px;color:#6b7280">作成者</div><div style="font-size:12px;font-weight:600">'+esc(S.eCompany)+'</div></div></div>';
+  var dispGrand=T.autoDis>0?T.finalTotal:T.grand;
+  h+='<div class="total-banner"><div style="font-size:13px;font-weight:600">'+esc(S.eClient)+'<br><span style="font-size:10px;color:#6b7280;font-weight:400">下記の通りお見積り申し上げます</span></div>';
+  h+='<div><div style="font-size:10px;color:#6b7280">お見積金額（税込）</div><div class="total-amount">¥'+fmt(dispGrand)+'</div></div></div>';
+  h+='</div>';
+  // テーブル
+  h+='<div class="tbl-head" style="grid-template-columns:'+cols3+'"><div>項目</div><div style="text-align:center">数量</div><div style="text-align:right">金額（税抜）</div></div>';
+  h+=eRows;
+  // 小計・値引き・値引後小計・消費税・合計
+  h+='<div class="sub-row" style="border-top:2px solid #2563eb;background:#161920"><span style="font-size:13px;color:#6b7280">小　計（税抜）</span><span style="font-size:13px;font-weight:800">¥'+fmt(T.subtotal)+'</span></div>';
+  if(T.autoDis>0){
+    h+='<div class="sub-row" style="background:#161920"><span style="font-size:13px;color:#e94560;font-weight:700">値引き</span><span style="font-size:13px;color:#e94560;font-weight:700">△¥'+fmt(T.autoDis)+'</span></div>';
+    h+='<div class="sub-row" style="background:#161920;border-top:1px solid #252a3a"><span style="font-size:13px;color:#6b7280">値引後　小　計（税抜）</span><span style="font-size:13px;font-weight:800">¥'+fmt(T.finalSub)+'</span></div>';
+  }
+  h+='<div class="sub-row" style="background:#161920"><span style="font-size:13px;color:#6b7280">消費税（10%）</span><span style="font-size:13px;color:#9ca3af">¥'+fmt(T.autoDis>0?T.finalTax:T.tax)+'</span></div>';
+  h+='<div class="grand-row"><div class="grand-inner">';
+  h+='<span style="color:#fff;font-weight:800;font-size:14px">合　計（税込）</span>';
+  h+='<span style="color:#e94560;font-weight:900;font-size:15px">¥'+fmt(T.autoDis>0?T.finalTotal:T.grand)+'</span>';
+  h+='</div>';
+  // 値引き目標入力
+  h+='<div class="target-wrap no-print"><div style="font-size:10px;color:#6b7280;margin-bottom:5px">税込希望金額を入力すると自動で値引きを計算します</div>';
+  h+='<div style="display:flex;gap:8px;align-items:center"><span style="font-size:13px;color:#6b7280">¥</span>';
+  h+='<input id="target-inp" class="target-input'+(T.autoDis>0?" active-border":"")+'" type="number" min="0" inputmode="numeric" value="'+esc(S.targetTotal)+'" placeholder="'+fmt(T.grand)+'"';
+  h+=' onblur="applyTarget(this.value)" onkeydown="if(event.key===\'Enter\'){applyTarget(this.value);this.blur();}">';
+  if(S.targetTotal) h+='<button onclick="S.targetTotal=\'\';renderEV()" style="border:none;background:none;color:#6b7280;font-size:16px;cursor:pointer">✕</button>';
+  h+='</div></div></div>';
+  // 工事部材内訳（確定済み表示 ＋ 手入力フォームはid=free-formで独立）
+  h+='<div style="padding:12px 14px;background:#1c2030">';
+  h+='<div class="section-title">工事部材 内訳</div>';
+  h+=matList;
+  h+='<div id="free-form" style="margin-top:10px;padding-top:10px;border-top:1px dashed #252a3a"></div>';
+  h+='</div>';
+  h+='<div style="background:#161920;padding:10px 14px;border-top:1px solid #252a3a;font-size:10px;color:#6b7280;text-align:center">※ 本見積書の有効期限は '+esc(S.eExpire)+' です。<br>※ 工事内容の変更により金額が変動する場合があります。</div>';
+  h+='</div>';
+  el.innerHTML=h;
+  // 手入力フォームを独立描画
+  renderFreeForm();
+}
+
+function setJA(val){S.isJA=val;renderEstimate();}
+function addLabor(){S.laborRows.push({id:S.laborId,name:"商品",detail:"",qty:"1式",amount:""});S.laborId++;renderEstimate();}
+function delLabor(id){S.laborRows=S.laborRows.filter(function(r){return r.id!==id;});renderEstimate();}
+function updateLabor(id,key,val){var r=S.laborRows.find(function(r){return r.id===id;});if(r){r[key]=val;renderEV();}}
+function onLaborName(id,name){
+  var r=S.laborRows.find(function(r){return r.id===id;});
+  if(r){r.name=name;var p=LABOR_PRESETS[name];if(p)r.amount=String(S.isJA?p.ja:p.general);}
+  renderEstimate();
+}
+function addFree(){S.freeItems.push({id:S.freeItemId,name:"",qty:"1",unit:"個",price:""});S.freeItemId++;renderEV();}
+function delFree(id){S.freeItems=S.freeItems.filter(function(f){return f.id!==id;});renderEV();}
+// onblurで呼ばれる：状態保存→合計だけ再計算
+function saveFree(id,key,val){
+  var f=S.freeItems.find(function(f){return f.id===id;});
+  if(f){f[key]=val;}
+  // 合計バナーだけ更新（フォームは触らない）
+  var T=calcTotals();
+  var banner=document.querySelector(".total-amount");
+  if(banner) banner.textContent="¥"+fmt(T.autoDis>0?T.finalTotal:T.grand);
+}
+function applyTarget(val){S.targetTotal=val;renderEV();}
+function printEstimate(){
+  var el=document.getElementById("e-print-area");if(!el)return;
+  var win=window.open("","_blank");
+  win.document.write('<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>御見積書</title><style>'
+    +'*{box-sizing:border-box;margin:0;padding:0;}'
+    +'body{font-family:\'Hiragino Kaku Gothic ProN\',sans-serif;background:#fff;color:#111;font-size:12px;}'
+    +'div,span{background:#fff!important;color:#111!important;border-color:#ccc!important;}'
+    +'input{background:#fff!important;color:#111!important;border:1px solid #ccc!important;border-radius:4px;padding:3px;font-size:11px;text-align:center;width:100%;}'
+    +'@page{margin:12mm;}'
+    // 値引後小計を印刷時非表示
+    +'.no-print{display:none!important;}'
+    // 工事部材内訳を2ページ目に
+    +'.page-break{page-break-before:always;break-before:page;padding-top:8mm;}'
+    +'</style></head><body>'+el.outerHTML+'</body></html>');
+  win.document.close();win.focus();setTimeout(function(){win.print();},300);
+}
+
+// ═══ 初期描画 ════════════════════════════════════════
+renderList();
+</script>
+</body>
+</html>

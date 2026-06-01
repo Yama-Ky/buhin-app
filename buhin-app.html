@@ -387,11 +387,11 @@ function renderReport(){
   var items=cartItems();
   var h='<div class="card">';
   h+='<div class="info-label" style="margin-top:0">会社名・屋号</div>';
-  h+='<input class="info-input" value="'+esc(S.rCompany)+'" oninput="S.rCompany=this.value">';
+  h+='<input class="info-input" value="'+esc(S.rCompany)+'" onblur="S.rCompany=this.value">';
   h+='<div class="info-label">工事名</div>';
-  h+='<input class="info-input" style="font-weight:600" value="'+esc(S.rProject)+'" oninput="S.rProject=this.value">';
+  h+='<input class="info-input" style="font-weight:600" value="'+esc(S.rProject)+'" onblur="S.rProject=this.value">';
   h+='<div class="info-label">作成日</div>';
-  h+='<input class="info-input" value="'+esc(S.rDate)+'" oninput="S.rDate=this.value">';
+  h+='<input class="info-input" value="'+esc(S.rDate)+'" onblur="S.rDate=this.value">';
   h+='</div>';
   if(items.length===0){
     h+='<div class="card empty"><div class="empty-icon">📋</div><div>部材が追加されていません</div><button class="add-btn" style="margin-top:12px;padding:9px 22px" onclick="switchTab(\'list\')">部材を選ぶ</button></div>';
@@ -481,11 +481,11 @@ function printReport(){
 function renderEstimate(){
   var el=document.getElementById("page-estimate");
   var h='<div class="card">';
-  h+='<div class="info-label" style="margin-top:0">会社名・屋号</div><input class="info-input" value="'+esc(S.eCompany)+'" oninput="S.eCompany=this.value">';
-  h+='<div class="info-label">宛先（お客様名）</div><input class="info-input" value="'+esc(S.eClient)+'" oninput="S.eClient=this.value">';
-  h+='<div class="info-label">工事名</div><input class="info-input" style="font-weight:600" value="'+esc(S.eProject)+'" oninput="S.eProject=this.value">';
-  h+='<div class="info-label">作成日</div><input class="info-input" value="'+esc(S.eDate)+'" oninput="S.eDate=this.value">';
-  h+='<div class="info-label">有効期限</div><input class="info-input" value="'+esc(S.eExpire)+'" oninput="S.eExpire=this.value">';
+  h+='<div class="info-label" style="margin-top:0">会社名・屋号</div><input class="info-input" value="'+esc(S.eCompany)+'" onblur="S.eCompany=this.value">';
+  h+='<div class="info-label">宛先（お客様名）</div><input class="info-input" value="'+esc(S.eClient)+'" onblur="S.eClient=this.value">';
+  h+='<div class="info-label">工事名</div><input class="info-input" style="font-weight:600" value="'+esc(S.eProject)+'" onblur="S.eProject=this.value">';
+  h+='<div class="info-label">作成日</div><input class="info-input" value="'+esc(S.eDate)+'" onblur="S.eDate=this.value">';
+  h+='<div class="info-label">有効期限</div><input class="info-input" value="'+esc(S.eExpire)+'" onblur="S.eExpire=this.value">';
   h+='</div>';
   h+='<div class="card" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px">';
   h+='<span style="font-size:13px;font-weight:700">作業料の単価区分</span>';

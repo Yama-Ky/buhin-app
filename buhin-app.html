@@ -356,12 +356,40 @@ function doAddAndNext(id){
   }
 }
 
+// タンク系カテゴリ（商品欄に移動するもの）
+var TANK_CATEGORIES=["灯油タンク","灯油タンク(JA)","灯油タンク部材","灯油タンク部材(JA)"];
+
 function doAdd(id){
   var item=MASTER.find(function(m){return m.id===id;});
   var qtyVal=S.qtyInputs[id];
   // 数量が未入力・空・0の場合は追加しない
   if(!qtyVal||qtyVal===""||parseFloat(qtyVal)<=0) return;
   var qty=parseFloat(qtyVal);
+
+  // タンク系は商品欄（laborRows）に追加
+  if(TANK_CATEGORIES.indexOf(item.category)>=0){
+    var amount=Math.round(item.price*qty);
+    var detail=item.name+(qty!==1?"　"+qty+item.unit+"":"");
+    S.laborRows.push({id:S.laborId,name:"商品",detail:detail,qty:qty+item.unit,amount:String(amount)});
+    S.laborId++;
+    S.qtyInputs[id]="";
+    updateBadges();
+    // カード更新
+    var card=document.getElementById("ic-"+id);
+    if(card){
+      card.classList.add("in-cart");
+      var badge=card.querySelector(".in-cart-badge");
+      var qInp=document.getElementById("qty-"+id);if(qInp)qInp.value="";
+      if(badge) badge.textContent="追加済 "+qty+item.unit;
+      else{
+        var sp=document.createElement("span");sp.className="in-cart-badge";
+        sp.textContent="追加済 "+qty+item.unit;
+        var row=card.querySelector("div[style*='justify-content']");if(row)row.appendChild(sp);
+      }
+    }
+    return;
+  }
+
   if(S.cart[id]) S.cart[id].qty=Math.round((S.cart[id].qty+qty)*10)/10;
   else S.cart[id]=Object.assign({},item,{qty:qty});
   S.qtyInputs[id]="";

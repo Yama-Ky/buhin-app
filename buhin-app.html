@@ -760,11 +760,14 @@ function printEstimate(){
     +'body{font-family:\'Hiragino Kaku Gothic ProN\',sans-serif;background:#fff;color:#111;font-size:12px;}'
     +'div,span{background:#fff!important;color:#111!important;border-color:#ccc!important;}'
     +'input{background:#fff!important;color:#111!important;border:1px solid #ccc!important;border-radius:4px;padding:3px;font-size:11px;text-align:center;width:100%;}'
-    +'@page{margin:12mm;}'
-    // 値引後小計を印刷時非表示
+    +'button{display:none!important;}'
     +'.no-print{display:none!important;}'
-    // 工事部材内訳を2ページ目に
-    +'.page-break{page-break-before:always;break-before:page;padding-top:8mm;}'
+    +'#free-form{display:none!important;}'
+    +'.mat-detail{margin-top:290mm;}'
+    +'@page{margin:12mm;size:A4;}'
+    +'@media print{'
+    +'.mat-detail{margin-top:0;page-break-before:always;break-before:page;}'
+    +'}'
     +'</style></head><body>'+el.outerHTML+'</body></html>');
   win.document.close();win.focus();setTimeout(function(){win.print();},300);
 }

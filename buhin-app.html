@@ -719,7 +719,7 @@ function renderEV(){
   if(S.targetTotal) h+='<button onclick="S.targetTotal=\'\';renderEV()" style="border:none;background:none;color:#6b7280;font-size:16px;cursor:pointer">✕</button>';
   h+='</div></div></div>';
   // 工事部材内訳（確定済み表示 ＋ 手入力フォームはid=free-formで独立）
-  h+='<div style="padding:12px 14px;background:#1c2030">';
+  h+='<div class="mat-detail" style="padding:12px 14px;background:#1c2030">';
   h+='<div class="section-title">工事部材 内訳</div>';
   h+=matList;
   h+='<div id="free-form" style="margin-top:10px;padding-top:10px;border-top:1px dashed #252a3a"></div>';

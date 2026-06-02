@@ -598,13 +598,18 @@ function renderEV(){
     return;
   }
   var cols3="1fr 90px 90px";
-  // 見積テーブル行
+  // laborRowsを前半（商品・作業料系）と後半（諸経費・工具損料・値引き）に分ける
+  var BOTTOM_ITEMS=["諸経費","工具損料","値引き"];
+  var laborTop=T.validLabor.filter(function(r){return BOTTOM_ITEMS.indexOf(r.name)<0;});
+  var laborBottom=T.validLabor.filter(function(r){return BOTTOM_ITEMS.indexOf(r.name)>=0;});
+
+  // 見積テーブル行（前半）
   var estRows=[];
-  T.validLabor.forEach(function(r){
+  laborTop.forEach(function(r){
     if(r.name||parseFloat(r.amount)!==0){
       var dn=r.name==="商品"?(r.detail||"商品"):r.name==="自由入力"?(r.detail||"自由入力"):r.name||"作業費";
-      var isDis=r.name==="値引き";
-      var amt=isDis?-Math.abs(parseFloat(r.amount)||0):(parseFloat(r.amount)||0);
+      var isDis=false;
+      var amt=parseFloat(r.amount)||0;
       estRows.push({name:dn,sub:"",qty:r.qty||"1式",amount:amt,isDis:isDis});
     }
   });
@@ -637,6 +642,15 @@ function renderEV(){
     estRows.push({name:label,sub:"部材内訳書参照",qty:"一式",amount:grpTotal,isDis:false,isGroup:true});
   });
   if(T.autoDis>0) estRows.push({name:"値引き",sub:"",qty:"一式",amount:-T.autoDis,isDis:true});
+  // 後半（諸経費・工具損料・値引き）を部材の後に追加
+  laborBottom.forEach(function(r){
+    if(r.name||parseFloat(r.amount)!==0){
+      var dn=r.name==="値引き"?"値引き":r.name==="自由入力"?(r.detail||"自由入力"):r.name||"作業費";
+      var isDis=r.name==="値引き";
+      var amt=isDis?-Math.abs(parseFloat(r.amount)||0):(parseFloat(r.amount)||0);
+      estRows.push({name:dn,sub:"",qty:r.qty||"1式",amount:amt,isDis:isDis});
+    }
+  });
 
   var eRows="";
   estRows.forEach(function(row,idx){

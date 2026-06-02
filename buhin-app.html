@@ -370,7 +370,7 @@ function doAdd(id){
   if(TANK_CATEGORIES.indexOf(item.category)>=0){
     var amount=Math.round(item.price*qty);
     var detail=item.name+(qty!==1?"　"+qty+item.unit+"":"");
-    S.laborRows.push({id:S.laborId,name:"商品",detail:detail,qty:qty+item.unit,amount:String(amount)});
+    S.laborRows.unshift({id:S.laborId,name:"商品",detail:detail,qty:qty+item.unit,amount:String(amount)});
     S.laborId++;
     S.qtyInputs[id]="";
     updateBadges();

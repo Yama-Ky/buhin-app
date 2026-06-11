@@ -499,10 +499,17 @@ function updateRQty(id,val){
 }
 function removeCart(id){delete S.cart[id];renderReport();updateBadges();}
 function printReport(){
-  var el=document.getElementById("r-print-area");if(!el)return;
-  var win=window.open("","_blank");
-  win.document.write('<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>部材内訳書</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:\'Hiragino Kaku Gothic ProN\',sans-serif;background:#fff;color:#111;font-size:12px;}div,span{background:#fff!important;color:#111!important;border-color:#ccc!important;}input{background:#fff!important;color:#111!important;border:1px solid #ccc!important;border-radius:4px;padding:3px;font-size:11px;text-align:center;width:100%;}@page{margin:12mm;}</style></head><body>'+el.outerHTML+'</body></html>');
-  win.document.close();win.focus();setTimeout(function(){win.print();},300);
+  var inputs=document.querySelectorAll('.info-input');
+  inputs.forEach(function(inp){inp.blur();});
+  setTimeout(function(){
+    renderReport();
+    setTimeout(function(){
+      var el=document.getElementById("r-print-area");if(!el)return;
+      var win=window.open("","_blank");
+      win.document.write('<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>部材内訳書</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:\'Hiragino Kaku Gothic ProN\',sans-serif;background:#fff;color:#111;font-size:12px;}div,span{background:#fff!important;color:#111!important;border-color:#ccc!important;}input{background:#fff!important;color:#111!important;border:1px solid #ccc!important;border-radius:4px;padding:3px;font-size:11px;text-align:center;width:100%;}@page{margin:12mm;}</style></head><body>'+el.outerHTML+'</body></html>');
+      win.document.close();win.focus();setTimeout(function(){win.print();},300);
+    },100);
+  },100);
 }
 
 // ═══ 見積書 ══════════════════════════════════════════
@@ -753,23 +760,40 @@ function saveFree(id,key,val){
 }
 function applyTarget(val){S.targetTotal=val;renderEV();}
 function printEstimate(){
-  var el=document.getElementById("e-print-area");if(!el)return;
-  var win=window.open("","_blank");
-  win.document.write('<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>御見積書</title><style>'
-    +'*{box-sizing:border-box;margin:0;padding:0;}'
-    +'body{font-family:\'Hiragino Kaku Gothic ProN\',sans-serif;background:#fff;color:#111;font-size:12px;}'
-    +'div,span{background:#fff!important;color:#111!important;border-color:#ccc!important;}'
-    +'input{background:#fff!important;color:#111!important;border:1px solid #ccc!important;border-radius:4px;padding:3px;font-size:11px;text-align:center;width:100%;}'
-    +'button{display:none!important;}'
-    +'.no-print{display:none!important;}'
-    +'#free-form{display:none!important;}'
-    +'.mat-detail{margin-top:290mm;}'
-    +'@page{margin:12mm;size:A4;}'
-    +'@media print{'
-    +'.mat-detail{margin-top:0;page-break-before:always;break-before:page;}'
-    +'}'
-    +'</style></head><body>'+el.outerHTML+'</body></html>');
-  win.document.close();win.focus();setTimeout(function(){win.print();},300);
+  // 全入力フィールドを強制保存
+  var fields=[
+    {id:'e-company', key:'eCompany'},
+    {id:'e-client',  key:'eClient'},
+    {id:'e-project', key:'eProject'},
+    {id:'e-date',    key:'eDate'},
+    {id:'e-expire',  key:'eExpire'},
+  ];
+  // inputを全部拾って強制blur
+  var inputs=document.querySelectorAll('.info-input');
+  inputs.forEach(function(inp){inp.blur();});
+  // 少し待ってから印刷（blurイベントが処理される時間を確保）
+  setTimeout(function(){
+    renderEV();
+    setTimeout(function(){
+      var el=document.getElementById("e-print-area");if(!el)return;
+      var win=window.open("","_blank");
+      win.document.write('<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>御見積書</title><style>'
+        +'*{box-sizing:border-box;margin:0;padding:0;}'
+        +'body{font-family:\'Hiragino Kaku Gothic ProN\',sans-serif;background:#fff;color:#111;font-size:12px;}'
+        +'div,span{background:#fff!important;color:#111!important;border-color:#ccc!important;}'
+        +'input{background:#fff!important;color:#111!important;border:1px solid #ccc!important;border-radius:4px;padding:3px;font-size:11px;text-align:center;width:100%;}'
+        +'button{display:none!important;}'
+        +'.no-print{display:none!important;}'
+        +'#free-form{display:none!important;}'
+        +'.mat-detail{margin-top:290mm;}'
+        +'@page{margin:12mm;size:A4;}'
+        +'@media print{'
+        +'.mat-detail{margin-top:0;page-break-before:always;break-before:page;}'
+        +'}'
+        +'</style></head><body>'+el.outerHTML+'</body></html>');
+      win.document.close();win.focus();setTimeout(function(){win.print();},300);
+    },100);
+  },100);
 }
 
 // ═══ 初期描画 ════════════════════════════════════════
